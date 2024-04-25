@@ -1,5 +1,6 @@
 package ajou.mse.auctioncookbe.DTO;
 
+import ajou.mse.auctioncookbe.entity.WaitingRoom;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,10 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthResponseDTO {
+public class WaitingRoomResponseDTO {
 
     private String resultStatus;
     private String description;
-    private String userUUID;
-    private String name;
+    private WaitingRoom waitingRoomInfo;
 }

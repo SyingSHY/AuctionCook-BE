@@ -1,7 +1,7 @@
 package ajou.mse.auctioncookbe.service;
 
 import ajou.mse.auctioncookbe.DTO.AuthResponseDTO;
-import ajou.mse.auctioncookbe.entity.UserData;
+import ajou.mse.auctioncookbe.entity.User;
 import ajou.mse.auctioncookbe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,13 +21,13 @@ public class AuthService {
         // ------------------
         // 사용자 로그인 처리
 
-        UserData newUser = UserData.builder()
+        User newUser = User.builder()
                 .redisId(null)
                 .name(name)
                 .timeToLive(USER_TIME_TO_LIVE_SECOND)
                 .build();
 
-        UserData savedUser = userRepository.save(newUser);
+        User savedUser = userRepository.save(newUser);
 
         return AuthResponseDTO.builder()
                 .resultStatus("SUCCESS")
@@ -42,7 +42,7 @@ public class AuthService {
         // ------------------
         // 사용자 로그아웃 처리
 
-        Optional<UserData> resultUserData = userRepository.findById(userUUID);
+        Optional<User> resultUserData = userRepository.findById(userUUID);
 
         if (resultUserData.isEmpty()) {
             return AuthResponseDTO.builder()
@@ -53,14 +53,14 @@ public class AuthService {
                     .build();
         }
         else {
-            UserData userData = resultUserData.get();
+            User user = resultUserData.get();
 
             userRepository.deleteById(userUUID);
 
             return AuthResponseDTO.builder()
                     .resultStatus("SUCCESS")
-                    .userUUID(userData.getRedisId())
-                    .name(userData.getName())
+                    .userUUID(user.getRedisId())
+                    .name(user.getName())
                     .description("Logout Successfully.")
                     .build();
         }
