@@ -40,11 +40,15 @@ public class WaitingRoomController {
     }
 
     @DeleteMapping("/rooms/{roomId}")
-    public ResponseEntity<String> deleteRoom(@PathVariable String roomId) {
+    public ResponseEntity<WaitingRoomResponseDTO> deleteRoom(@PathVariable String roomId, @RequestParam String userUUID) {
         // Suggest RoomID and left the waiting room
         // --------------------------------
-        // 현재 대기실의 RoomID를 제시하고 이탈
+        // 현재 대기실의 RoomID와 자신의 UUID를 제시하고 이탈
 
-        return null;
+        WaitingRoomResponseDTO waitingRoomResponseDTO = waitingRoomService.leaveRoom(roomId, userUUID);
+
+        if (waitingRoomResponseDTO.getResultStatus().equals("SUCCESS"))
+            return ResponseEntity.ok(waitingRoomResponseDTO);
+        else return ResponseEntity.badRequest().body(waitingRoomResponseDTO);
     }
 }

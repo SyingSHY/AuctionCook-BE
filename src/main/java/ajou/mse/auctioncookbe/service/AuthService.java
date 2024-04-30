@@ -11,7 +11,7 @@ import java.util.Optional;
 @Service
 public class AuthService {
 
-    private static final long USER_TIME_TO_LIVE_SECOND = 600;
+    private static final long USER_TIME_TO_LIVE_SECOND = 60 * 60;
 
     @Autowired
     private UserRepository userRepository;

@@ -157,6 +157,77 @@ public class WaitingRoomService {
                 .build();
     }
 
+    public WaitingRoomResponseDTO leaveRoom(String roomID, String userID) {
+        // Room Check and User Check
+        Optional<User> userOptional = userRepository.findById(userID);
+
+        if (userOptional.isEmpty()) {
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("Failed to leave the waiting room: Invalid User data.")
+                    .waitingRoomInfo(null)
+                    .build();
+        }
+
+        Optional<WaitingRoom> waitingRoomOptional = waitingRoomRepository.findById(roomID);
+
+        if (waitingRoomOptional.isEmpty()) {
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("Failed to leave the waiting room: Invalid Room data.")
+                    .waitingRoomInfo(null)
+                    .build();
+        }
+
+        // Every parameter is fine. Proceed leaving.
+        User user = userOptional.get();
+        WaitingRoom leavingRoom = waitingRoomOptional.get();
+
+        // Is this user already leaved room?
+        if (!isAlreadyJoinedWaitingRoom(user)) {
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("Failed to leave a waiting room: User already leaved a room.")
+                    .waitingRoomInfo(null)
+                    .build();
+        }
+
+        leavingRoom.leaveUser(user);
+        user.setJoiningRoom(null);
+
+        // User leaves the room
+        try {
+            userRepository.save(user);
+            waitingRoomRepository.save(leavingRoom);
+        } catch (RedisException e) {
+            e.printStackTrace();
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("Failed to leave the waiting room: Redis error.")
+                    .waitingRoomInfo(null)
+                    .build();
+        }
+
+        if (leavingRoom.getJoinedUsers().isEmpty()) {
+            try {
+                waitingRoomRepository.delete(leavingRoom);
+            } catch (RedisException e) {
+                e.printStackTrace();
+                return WaitingRoomResponseDTO.builder()
+                        .resultStatus("FAILED")
+                        .description("Failed to leave the waiting room: Redis error.")
+                        .waitingRoomInfo(null)
+                        .build();
+            }
+        }
+
+        return WaitingRoomResponseDTO.builder()
+                .resultStatus("SUCCESS")
+                .description("Successfully leaved the waiting room.")
+                .waitingRoomInfo(null)
+                .build();
+    }
+
     private String generateRoomCode() {
 
         while (true) {
