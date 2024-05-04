@@ -25,19 +25,40 @@ public class WaitingRoom {
 
     private User roomCreator;
 
-    private List<User> joinedUsers;
+    private boolean gameStart = false;
+
+    private Map<String, User> joinedUsers = new HashMap<String, User>() {{
+        put("Player1", null);
+        put("Player2", null);
+        put("Player3", null);
+        put("Player4", null);
+    }};
 
     public WaitingRoom(String roomCode, User roomCreator, User joinedUser) {
         this.roomCode = roomCode;
         this.roomCreator = roomCreator;
-        this.joinedUsers.add(joinedUser);
+        joinUser(joinedUser);
     }
 
-    public boolean joinUser(User user) {
-        return joinedUsers.add(user);
+    public User joinUser(User user) {
+
+        for (String userSeat : joinedUsers.keySet()) {
+            if (joinedUsers.get(userSeat) == null) {
+                return joinedUsers.put(userSeat, user);
+            }
+        }
+
+        return null;
     }
 
-    public boolean leaveUser(User user) {
-        return joinedUsers.remove(user);
+    public User leaveUser(User user) {
+
+        for (String userSeat : joinedUsers.keySet()) {
+            if (joinedUsers.get(userSeat).equals(user)) {
+                return joinedUsers.remove(userSeat);
+            }
+        }
+
+        return null;
     }
 }

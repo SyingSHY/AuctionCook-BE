@@ -18,9 +18,16 @@ public class User {
 
     @Id
     private String redisId;
+
     @Indexed
     private String name;
+
     private String joiningRoom;
+
+    private boolean statusGameReady = false;
+
+    private boolean statusLoadingEnd = false;
+
     @TimeToLive
     private long timeToLive;
 

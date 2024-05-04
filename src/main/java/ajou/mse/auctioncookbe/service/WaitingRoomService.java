@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -51,7 +51,7 @@ public class WaitingRoomService {
         WaitingRoom joiningRoom = waitingRoomOptional.get();
 
         // Is this user already joining other room?
-        if (isAlreadyJoinedWaitingRoom(user)) {
+        if (isJoinedWaitingRoom(user)) {
             return WaitingRoomResponseDTO.builder()
                     .resultStatus("FAILED")
                     .description("Failed to join a waiting room: User already joining room - " + user.getJoiningRoom())
@@ -91,8 +91,6 @@ public class WaitingRoomService {
                 .build();
     }
 
-
-
     @Transactional
     public WaitingRoomResponseDTO createRoom(String createrID) {
 
@@ -108,7 +106,7 @@ public class WaitingRoomService {
 
         User creatorUser = userOptional.get();
 
-        if (isAlreadyJoinedWaitingRoom(creatorUser)) {
+        if (isJoinedWaitingRoom(creatorUser)) {
             return WaitingRoomResponseDTO.builder()
                     .resultStatus("FAILED")
                     .description("Failed to create a waiting room: User already joining room - " + creatorUser.getJoiningRoom())
@@ -120,7 +118,6 @@ public class WaitingRoomService {
                 .redisId(null)
                 .roomCode(generateRoomCode())
                 .roomCreator(creatorUser)
-                .joinedUsers(new ArrayList<>())
                 .build();
         WaitingRoom createdWaitingRoom;
 
@@ -184,7 +181,7 @@ public class WaitingRoomService {
         WaitingRoom leavingRoom = waitingRoomOptional.get();
 
         // Is this user already leaved room?
-        if (!isAlreadyJoinedWaitingRoom(user)) {
+        if (!isJoinedWaitingRoom(user)) {
             return WaitingRoomResponseDTO.builder()
                     .resultStatus("FAILED")
                     .description("Failed to leave a waiting room: User already leaved a room.")
@@ -228,6 +225,124 @@ public class WaitingRoomService {
                 .build();
     }
 
+    public WaitingRoomResponseDTO checkRoom(String roomID, String userID) {
+
+        Optional<WaitingRoom> waitingRoomOptional = waitingRoomRepository.findById(roomID);
+
+        WaitingRoom roomCandidate;
+        if (waitingRoomOptional.isPresent()) {
+            roomCandidate = waitingRoomOptional.get();
+        }
+        else {
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("There's no such room there.")
+                    .waitingRoomInfo(null)
+                    .build();
+        }
+
+        return WaitingRoomResponseDTO.builder()
+                .resultStatus("SUCCESS")
+                .description("Returning information of the waiting room.")
+                .waitingRoomInfo(roomCandidate)
+                .build();
+    }
+
+    public WaitingRoomResponseDTO setReadyState(String roomID, String userID) {
+        // Room Check and User Check
+        Optional<User> userOptional = userRepository.findById(userID);
+
+        if (userOptional.isEmpty()) {
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("Failed to set ready state: Invalid User data.")
+                    .waitingRoomInfo(null)
+                    .build();
+        }
+
+        Optional<WaitingRoom> waitingRoomOptional = waitingRoomRepository.findById(roomID);
+
+        if (waitingRoomOptional.isEmpty()) {
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("Failed to set ready state: Invalid Room data.")
+                    .waitingRoomInfo(null)
+                    .build();
+        }
+
+        // Every parameter is fine. Proceed leaving.
+        User user = userOptional.get();
+        WaitingRoom playingRoom = waitingRoomOptional.get();
+
+        if (!isJoinedWaitingRoom(user)) {
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("Failed to set ready state: User is now outside of the room.")
+                    .waitingRoomInfo(null)
+                    .build();
+        }
+
+        // Is request fine?
+        if (!Objects.equals(user.getJoiningRoom(), playingRoom.getRedisId())) {
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("Failed to set ready state: There's error in roomID.")
+                    .waitingRoomInfo(playingRoom)
+                    .build();
+        }
+
+        // Request all fine. set ready status.
+        user.setStatusGameReady(!user.isStatusGameReady());
+
+        // User leaves the room
+        try {
+            userRepository.save(user);
+        } catch (RedisException e) {
+            e.printStackTrace();
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("Failed to set ready state: Redis error.")
+                    .waitingRoomInfo(playingRoom)
+                    .build();
+        }
+
+        // Re-fetch room information
+        Optional<WaitingRoom> waitingRoomOptionalAfter = waitingRoomRepository.findById(roomID);
+
+        playingRoom = waitingRoomOptionalAfter.get();
+
+        for (User player : playingRoom.getJoinedUsers().values()) {
+            // Do all players has ready?
+
+            if (!player.isStatusGameReady()) {
+                return WaitingRoomResponseDTO.builder()
+                        .resultStatus("SUCCESS")
+                        .description("User's ready state changed.")
+                        .waitingRoomInfo(playingRoom)
+                        .build();
+            }
+        }
+
+        // Every User now ready
+        playingRoom.setGameStart(true);
+        try {
+            waitingRoomRepository.save(playingRoom);
+        } catch (RedisException e) {
+            e.printStackTrace();
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("FAILED")
+                    .description("Failed to set ready state: Redis error.")
+                    .waitingRoomInfo(null)
+                    .build();
+        }
+
+        return WaitingRoomResponseDTO.builder()
+                .resultStatus("SUCCESS")
+                .description("User's ready state changed, and all ready to play.")
+                .waitingRoomInfo(playingRoom)
+                .build();
+    }
+
     private String generateRoomCode() {
 
         while (true) {
@@ -244,7 +359,7 @@ public class WaitingRoomService {
         }
     }
 
-    private static boolean isAlreadyJoinedWaitingRoom(User user) {
+    private static boolean isJoinedWaitingRoom(User user) {
         return user.getJoiningRoom() != null;
     }
 
