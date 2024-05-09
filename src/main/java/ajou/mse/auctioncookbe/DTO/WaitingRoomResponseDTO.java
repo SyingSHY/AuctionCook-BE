@@ -14,5 +14,5 @@ public class WaitingRoomResponseDTO {
 
     private String resultStatus;
     private String description;
-    private WaitingRoom waitingRoomInfo;
+    private WaitingRoomDTO waitingRoomInfo;
 }

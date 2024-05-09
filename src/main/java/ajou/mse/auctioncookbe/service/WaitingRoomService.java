@@ -1,5 +1,6 @@
 package ajou.mse.auctioncookbe.service;
 
+import ajou.mse.auctioncookbe.DTO.WaitingRoomDTO;
 import ajou.mse.auctioncookbe.DTO.WaitingRoomResponseDTO;
 import ajou.mse.auctioncookbe.entity.User;
 import ajou.mse.auctioncookbe.entity.WaitingRoom;
@@ -10,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class WaitingRoomService {
@@ -55,7 +54,7 @@ public class WaitingRoomService {
             return WaitingRoomResponseDTO.builder()
                     .resultStatus("FAILED")
                     .description("Failed to join a waiting room: User already joining room - " + user.getJoiningRoom())
-                    .waitingRoomInfo(waitingRoomRepository.findById(user.getJoiningRoom()).get())
+                    .waitingRoomInfo(waitingRoomDtoConverter(waitingRoomRepository.findById(user.getJoiningRoom()).get()))
                     .build();
         }
 
@@ -68,7 +67,7 @@ public class WaitingRoomService {
                     .build();
         }
 
-        joiningRoom.joinUser(user);
+        joiningRoom.joinUser(user.getRedisId());
         user.setJoiningRoom(joiningRoom.getRedisId());
 
         // User joins the room
@@ -87,7 +86,7 @@ public class WaitingRoomService {
         return WaitingRoomResponseDTO.builder()
                 .resultStatus("SUCCESS")
                 .description("Successfully joined the waiting room.")
-                .waitingRoomInfo(joiningRoom)
+                .waitingRoomInfo(waitingRoomDtoConverter(joiningRoom))
                 .build();
     }
 
@@ -110,14 +109,15 @@ public class WaitingRoomService {
             return WaitingRoomResponseDTO.builder()
                     .resultStatus("FAILED")
                     .description("Failed to create a waiting room: User already joining room - " + creatorUser.getJoiningRoom())
-                    .waitingRoomInfo(waitingRoomRepository.findById(creatorUser.getJoiningRoom()).get())
+                    .waitingRoomInfo(waitingRoomDtoConverter(waitingRoomRepository.findById(creatorUser.getJoiningRoom()).get()))
                     .build();
         }
 
         WaitingRoom newWaitingRoom = WaitingRoom.builder()
                 .redisId(null)
                 .roomCode(generateRoomCode())
-                .roomCreator(creatorUser)
+                .roomCreator(creatorUser.getRedisId())
+                .joinedUsers(new ArrayList<>())
                 .build();
         WaitingRoom createdWaitingRoom;
 
@@ -132,7 +132,7 @@ public class WaitingRoomService {
                     .build();
         }
 
-        createdWaitingRoom.joinUser(creatorUser);
+        createdWaitingRoom.joinUser(creatorUser.getRedisId());
         creatorUser.setJoiningRoom(createdWaitingRoom.getRedisId());
 
         try {
@@ -150,7 +150,7 @@ public class WaitingRoomService {
         return WaitingRoomResponseDTO.builder()
                 .resultStatus("SUCCESS")
                 .description("Successfully created and joined the waiting room.")
-                .waitingRoomInfo(createdWaitingRoom)
+                .waitingRoomInfo(waitingRoomDtoConverter(createdWaitingRoom))
                 .build();
     }
 
@@ -189,7 +189,7 @@ public class WaitingRoomService {
                     .build();
         }
 
-        leavingRoom.leaveUser(user);
+        leavingRoom.leaveUser(user.getRedisId());
         user.setJoiningRoom(null);
 
         // User leaves the room
@@ -244,7 +244,7 @@ public class WaitingRoomService {
         return WaitingRoomResponseDTO.builder()
                 .resultStatus("SUCCESS")
                 .description("Returning information of the waiting room.")
-                .waitingRoomInfo(roomCandidate)
+                .waitingRoomInfo(waitingRoomDtoConverter(roomCandidate))
                 .build();
     }
 
@@ -270,7 +270,7 @@ public class WaitingRoomService {
                     .build();
         }
 
-        // Every parameter is fine. Proceed leaving.
+        // Every parameter is fine. Proceed.
         User user = userOptional.get();
         WaitingRoom playingRoom = waitingRoomOptional.get();
 
@@ -287,22 +287,23 @@ public class WaitingRoomService {
             return WaitingRoomResponseDTO.builder()
                     .resultStatus("FAILED")
                     .description("Failed to set ready state: There's error in roomID.")
-                    .waitingRoomInfo(playingRoom)
+                    .waitingRoomInfo(waitingRoomDtoConverter(playingRoom))
                     .build();
         }
 
         // Request all fine. set ready status.
         user.setStatusGameReady(!user.isStatusGameReady());
 
-        // User leaves the room
+        // User ready
         try {
             userRepository.save(user);
+            waitingRoomRepository.save(playingRoom);
         } catch (RedisException e) {
             e.printStackTrace();
             return WaitingRoomResponseDTO.builder()
                     .resultStatus("FAILED")
                     .description("Failed to set ready state: Redis error.")
-                    .waitingRoomInfo(playingRoom)
+                    .waitingRoomInfo(waitingRoomDtoConverter(playingRoom))
                     .build();
         }
 
@@ -311,14 +312,22 @@ public class WaitingRoomService {
 
         playingRoom = waitingRoomOptionalAfter.get();
 
-        for (User player : playingRoom.getJoinedUsers().values()) {
-            // Do all players has ready?
+        if (playingRoom.getJoinedUsers().size() != 4) {
 
-            if (!player.isStatusGameReady()) {
+            return WaitingRoomResponseDTO.builder()
+                    .resultStatus("SUCCESS")
+                    .description("User's ready state changed.")
+                    .waitingRoomInfo(waitingRoomDtoConverter(playingRoom))
+                    .build();
+        }
+
+        for (String playerID : playingRoom.getJoinedUsers()) {
+            // Do all players has ready?
+            if (!userRepository.findById(playerID).get().isStatusGameReady()) {
                 return WaitingRoomResponseDTO.builder()
                         .resultStatus("SUCCESS")
                         .description("User's ready state changed.")
-                        .waitingRoomInfo(playingRoom)
+                        .waitingRoomInfo(waitingRoomDtoConverter(playingRoom))
                         .build();
             }
         }
@@ -339,7 +348,7 @@ public class WaitingRoomService {
         return WaitingRoomResponseDTO.builder()
                 .resultStatus("SUCCESS")
                 .description("User's ready state changed, and all ready to play.")
-                .waitingRoomInfo(playingRoom)
+                .waitingRoomInfo(waitingRoomDtoConverter(playingRoom))
                 .build();
     }
 
@@ -369,5 +378,27 @@ public class WaitingRoomService {
 
     private static boolean isRoomFull(WaitingRoom joiningRoom) {
         return joiningRoom.getJoinedUsers().size() == MAX_USER;
+    }
+
+    private WaitingRoomDTO waitingRoomDtoConverter(WaitingRoom waitingRoom) {
+        return new WaitingRoomDTO(waitingRoom,
+                fetchRoomCreator(waitingRoom),
+                fetchJoinedUsers(waitingRoom));
+    }
+
+    private User fetchRoomCreator(WaitingRoom waitingRoom) {
+        return userRepository.findById(waitingRoom.getRoomCreator()).get();
+    }
+
+    private List<User> fetchJoinedUsers(WaitingRoom waitingRoom) {
+        List<User> result = new ArrayList<>();
+
+        List<String> usersID = waitingRoom.getJoinedUsers();
+        for (String userID : usersID) {
+            User fetchedUser = userRepository.findById(userID).get();
+            result.add(fetchedUser);
+        }
+
+        return result;
     }
 }

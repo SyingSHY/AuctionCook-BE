@@ -23,42 +23,23 @@ public class WaitingRoom {
     @Indexed
     private String roomCode;
 
-    private User roomCreator;
+    private String roomCreator;
 
     private boolean gameStart = false;
 
-    private Map<String, User> joinedUsers = new HashMap<String, User>() {{
-        put("Player1", null);
-        put("Player2", null);
-        put("Player3", null);
-        put("Player4", null);
-    }};
+    private List<String> joinedUsers;
 
-    public WaitingRoom(String roomCode, User roomCreator, User joinedUser) {
+    public WaitingRoom(String roomCode, String roomCreator, String joinedUser) {
         this.roomCode = roomCode;
         this.roomCreator = roomCreator;
-        joinUser(joinedUser);
+        this.joinedUsers.add(joinedUser);
     }
 
-    public User joinUser(User user) {
-
-        for (String userSeat : joinedUsers.keySet()) {
-            if (joinedUsers.get(userSeat) == null) {
-                return joinedUsers.put(userSeat, user);
-            }
-        }
-
-        return null;
+    public boolean joinUser(String user) {
+        return joinedUsers.add(user);
     }
 
-    public User leaveUser(User user) {
-
-        for (String userSeat : joinedUsers.keySet()) {
-            if (joinedUsers.get(userSeat).equals(user)) {
-                return joinedUsers.remove(userSeat);
-            }
-        }
-
-        return null;
+    public boolean leaveUser(String user) {
+        return joinedUsers.remove(user);
     }
 }
