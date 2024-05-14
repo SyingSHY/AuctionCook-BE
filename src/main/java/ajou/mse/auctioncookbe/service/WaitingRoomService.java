@@ -22,6 +22,8 @@ public class WaitingRoomService {
     private UserRepository userRepository;
     @Autowired
     private WaitingRoomRepository waitingRoomRepository;
+    @Autowired
+    private GameRoomManageService gameRoomManageService;
 
     public WaitingRoomResponseDTO joinRoom(String roomCode, String userID) {
         // Room Check and User Check
@@ -344,6 +346,8 @@ public class WaitingRoomService {
                     .waitingRoomInfo(null)
                     .build();
         }
+
+        gameRoomManageService.initGameRoom(playingRoom);
 
         return WaitingRoomResponseDTO.builder()
                 .resultStatus("SUCCESS")
