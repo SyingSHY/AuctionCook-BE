@@ -1,7 +1,9 @@
 package ajou.mse.auctioncookbe.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -9,6 +11,8 @@ import java.util.List;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class InGameRoom {
     // Game Phase
     // WAIT: 게임 시작하지 않음

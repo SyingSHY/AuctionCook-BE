@@ -11,8 +11,8 @@ import java.util.*;
 @Service
 public class GameRoomManageService {
 
-    @Autowired
-    private GameEventService gameEventService;
+//    @Autowired
+//    private GameEventService gameEventService;
     @Autowired
     private UserRepository userRepository;
 
@@ -41,12 +41,12 @@ public class GameRoomManageService {
             if (!player.isFinishedLoading()) return "NOW YOU'RE READY. KEEP WATCHING EVENT BUS.";
         }
 
-        gameEventService.postEventByServer(gameRoomID, "GAME START");
+        // gameEventService.postEventByServer(gameRoomID, "GAME START");
 
         gameRoom.setGamePhase("READY");
         gameRoom.setCurrentGamePhaseTimeStamp(LocalDateTime.now());
 
-        gameEventService.postEventByServer(gameRoomID, "PHASE READY");
+        // gameEventService.postEventByServer(gameRoomID, "PHASE READY");
 
         return "GAME START";
     }
