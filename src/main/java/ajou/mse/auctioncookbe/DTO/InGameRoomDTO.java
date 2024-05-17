@@ -2,10 +2,12 @@ package ajou.mse.auctioncookbe.DTO;
 
 import ajou.mse.auctioncookbe.entity.InGameRoom;
 import ajou.mse.auctioncookbe.entity.Player;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Getter
 public class InGameRoomDTO {
     // Game Phase
     // WAIT: 게임 시작하지 않음
@@ -18,7 +20,7 @@ public class InGameRoomDTO {
     private String gameCreator;
     private List<Player> gamePlayers;
     private String gamePhase;
-    private LocalDateTime currentGamePhaseTimeStamp;
+    private String currentGamePhaseTimeStamp;
     private int gameTurnCount;
 
     public InGameRoomDTO(InGameRoom inGameRoom) {
@@ -26,7 +28,7 @@ public class InGameRoomDTO {
         this.gameCreator = inGameRoom.getGameCreator();
         this.gamePlayers = inGameRoom.getGamePlayers();
         this.gamePhase = inGameRoom.getGamePhase();
-        this.currentGamePhaseTimeStamp = inGameRoom.getCurrentGamePhaseTimeStamp();
+        this.currentGamePhaseTimeStamp = inGameRoom.getCurrentGamePhaseTimeStamp().toString();
         this.gameTurnCount = inGameRoom.getGameTurnCount();
     }
 }
