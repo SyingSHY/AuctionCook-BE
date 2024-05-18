@@ -2,24 +2,31 @@ package ajou.mse.auctioncookbe.service;
 
 import ajou.mse.auctioncookbe.entity.*;
 import ajou.mse.auctioncookbe.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class GameRoomManageService {
 
 //    @Autowired
 //    private GameEventService gameEventService;
-    @Autowired
     private UserRepository userRepository;
 
     private Map<String, InGameRoom> inGameRooms;
 
-    public GameRoomManageService() {
-        this.inGameRooms = new HashMap<>();
+    @Autowired
+    public GameRoomManageService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        this.inGameRooms = new ConcurrentHashMap<>();
     }
 
     public String initGameRoom(WaitingRoom waitingRoom) {
