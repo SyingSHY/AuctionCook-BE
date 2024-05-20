@@ -1,6 +1,7 @@
 package ajou.mse.auctioncookbe.controller;
 
 import ajou.mse.auctioncookbe.DTO.WaitingRoomResponseDTO;
+import ajou.mse.auctioncookbe.service.DummyService;
 import ajou.mse.auctioncookbe.service.WaitingRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +11,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class WaitingRoomController {
 
+    private final WaitingRoomService waitingRoomService;
+    private final DummyService dummyService;
+
     @Autowired
-    private WaitingRoomService waitingRoomService;
+    public WaitingRoomController(WaitingRoomService waitingRoomService, DummyService dummyService) {
+        this.waitingRoomService = waitingRoomService;
+        this.dummyService = dummyService;
+    }
 
     @GetMapping("/rooms/{roomId}")
     public ResponseEntity<WaitingRoomResponseDTO> checkRoom(@PathVariable String roomId, @RequestParam String userUUID) {
@@ -76,5 +83,12 @@ public class WaitingRoomController {
         if (waitingRoomResponseDTO.getResultStatus().equals("SUCCESS"))
             return ResponseEntity.ok(waitingRoomResponseDTO);
         else return ResponseEntity.badRequest().body(waitingRoomResponseDTO);
+    }
+
+    @PostMapping("/rooms/{roomId}/dummy")
+    public ResponseEntity<String> putDummyToWaitingRoom(@PathVariable String roomId) {
+        // 대기실에 준비 상태의 더미 투입
+        String result = dummyService.putDummyToWaitingRoom(roomId);
+        return ResponseEntity.ok(result);
     }
 }
