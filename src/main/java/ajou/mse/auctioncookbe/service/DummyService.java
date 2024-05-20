@@ -16,7 +16,7 @@ public class DummyService {
     @Autowired
     private WaitingRoomService waitingRoomService;
 
-    public String putDummyToWaitingRoom(String waitingRoomID) {
+    public WaitingRoomResponseDTO putDummyToWaitingRoom(String waitingRoomCode) {
 
         List<String> dummyList = new ArrayList<>();
 
@@ -29,20 +29,26 @@ public class DummyService {
         AuthResponseDTO dummyAuth03 = authService.loginUser("Dummy-Bot-03");
         dummyList.add(dummyAuth03.getUserUUID());
 
+        String waitingRoomID = "";
         for (String userUUID : dummyList) {
-            WaitingRoomResponseDTO waitingRoomResponseDTO = waitingRoomService.joinRoom(waitingRoomID, userUUID);
+            WaitingRoomResponseDTO waitingRoomResponseDTO = waitingRoomService.joinRoom(waitingRoomCode, userUUID);
             if (waitingRoomResponseDTO.getResultStatus().equals("FAILED")) {
-                return "Failed to add dummies to the waiting room.";
+                return waitingRoomResponseDTO;
             }
+            waitingRoomID = waitingRoomResponseDTO.getWaitingRoomInfo().getRedisId();
         }
 
         for (String userUUID : dummyList) {
             WaitingRoomResponseDTO waitingRoomResponseDTO = waitingRoomService.setReadyState(waitingRoomID, userUUID);
             if (waitingRoomResponseDTO.getResultStatus().equals("FAILED")) {
-                return "Failed during setting ready state of dummies.";
+                return waitingRoomResponseDTO;
             }
         }
 
-        return "Successfully added dummies to the waiting room.";
+        return WaitingRoomResponseDTO.builder()
+                .resultStatus("SUCCESS")
+                .description("Dummies added to the waiting room.")
+                .waitingRoomInfo(null)
+                .build();
     }
 }

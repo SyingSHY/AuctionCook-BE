@@ -85,10 +85,10 @@ public class WaitingRoomController {
         else return ResponseEntity.badRequest().body(waitingRoomResponseDTO);
     }
 
-    @PostMapping("/rooms/{roomId}/dummy")
-    public ResponseEntity<String> putDummyToWaitingRoom(@PathVariable String roomId) {
+    @PostMapping("/rooms/{roomCode}/dummy")
+    public ResponseEntity<WaitingRoomResponseDTO> putDummyToWaitingRoom(@PathVariable String roomCode) {
         // 대기실에 준비 상태의 더미 투입
-        String result = dummyService.putDummyToWaitingRoom(roomId);
-        return ResponseEntity.ok(result);
+        WaitingRoomResponseDTO waitingRoomResponseDTO = dummyService.putDummyToWaitingRoom(roomCode);
+        return ResponseEntity.ok(waitingRoomResponseDTO);
     }
 }
