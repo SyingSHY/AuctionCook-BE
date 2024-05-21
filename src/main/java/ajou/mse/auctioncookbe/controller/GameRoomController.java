@@ -1,6 +1,7 @@
 package ajou.mse.auctioncookbe.controller;
 
 import ajou.mse.auctioncookbe.DTO.InGameRoomDTO;
+import ajou.mse.auctioncookbe.service.DummyService;
 import ajou.mse.auctioncookbe.service.GameRoomManageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,8 @@ public class GameRoomController {
 
     @Autowired
     private GameRoomManageService gameRoomManageService;
+    @Autowired
+    private DummyService dummyService;
 
     @GetMapping("/games/{gameID}")
     public InGameRoomDTO fetchGameStatus(@PathVariable String gameID) {
@@ -37,4 +40,8 @@ public class GameRoomController {
         return gameRoomManageService.postRecipe(gameID, playerID, recipeID);
     }
 
+    @PutMapping("/games/{gameID}/dummy/ready")
+    public String setReadyForDummy(@PathVariable String gameID, @RequestParam String playerID) {
+        return dummyService.setDummyToGameReady(gameID, playerID);
+    }
 }

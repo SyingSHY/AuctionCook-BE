@@ -2,6 +2,8 @@ package ajou.mse.auctioncookbe.service;
 
 import ajou.mse.auctioncookbe.DTO.AuthResponseDTO;
 import ajou.mse.auctioncookbe.DTO.WaitingRoomResponseDTO;
+import ajou.mse.auctioncookbe.entity.InGameRoom;
+import ajou.mse.auctioncookbe.entity.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ public class DummyService {
     private AuthService authService;
     @Autowired
     private WaitingRoomService waitingRoomService;
+    @Autowired
+    private GameRoomManageService gameRoomManageService;
 
     public WaitingRoomResponseDTO putDummyToWaitingRoom(String waitingRoomCode) {
 
@@ -50,5 +54,19 @@ public class DummyService {
                 .description("Dummies added to the waiting room.")
                 .waitingRoomInfo(null)
                 .build();
+    }
+
+    public String setDummyToGameReady(String gameRoomID, String humanPlayerID) {
+
+        InGameRoom inGameRoom = gameRoomManageService.queryGameRoom(gameRoomID);
+        List<Player> playerList = inGameRoom.getGamePlayers();
+
+        for (Player player : playerList) {
+            if (player.getPlayerID().equals(humanPlayerID)) {
+                gameRoomManageService.setReady(gameRoomID, player.getPlayerID());
+            }
+        }
+
+        return "SUCCESS";
     }
 }
