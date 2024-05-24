@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Player {
     private String playerID;
+    private String playerName;
     private boolean finishedLoading;
     private boolean goingOnBid;
     private int token;
@@ -23,6 +24,7 @@ public class Player {
 
     public Player(User user) {
         this.playerID = user.getRedisId();
+        this.playerName = user.getName();
         this.finishedLoading = false;
         this.goingOnBid = true;
         this.token = 30;
