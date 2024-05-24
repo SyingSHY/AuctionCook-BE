@@ -62,7 +62,7 @@ public class DummyService {
         List<Player> playerList = inGameRoom.getGamePlayers();
 
         for (Player player : playerList) {
-            if (player.getPlayerID().equals(humanPlayerID)) {
+            if (!player.getPlayerID().equals(humanPlayerID)) {
                 gameRoomManageService.setReady(gameRoomID, player.getPlayerID());
             }
         }
