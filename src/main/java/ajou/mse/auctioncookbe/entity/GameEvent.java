@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ public class GameEvent {
 
     public GameEvent(String eventType, String eventTarget, String eventContent, InGameRoom gameRoom) {
         this.eventType = eventType;
-        this.eventTime = LocalDateTime.now();
+        this.eventTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.eventSource = "SERVER";
         this.eventTarget = eventTarget;
         this.eventContent = eventContent;
@@ -39,7 +40,7 @@ public class GameEvent {
 
     public GameEvent(String eventType, String eventContent, InGameRoom gameRoom) {
         this.eventType = eventType;
-        this.eventTime = LocalDateTime.now();
+        this.eventTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.eventSource = "SERVER";
         this.eventTarget = "ALL";
         this.eventContent = eventContent;
@@ -53,7 +54,7 @@ public class GameEvent {
 
     public GameEvent(GameEventDTO gameEventDTO, InGameRoom gameRoom) {
         this.eventType = gameEventDTO.getEventType();
-        this.eventTime = LocalDateTime.now();
+        this.eventTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.eventSource = gameEventDTO.getEventSource();
         this.eventTarget = gameEventDTO.getEventTarget();
         this.eventContent = gameEventDTO.getEventContent();
@@ -67,7 +68,7 @@ public class GameEvent {
 
     public GameEvent() {
         this.eventType = "NULL";
-        this.eventTime = LocalDateTime.now();
+        this.eventTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.eventSource = "NULL";
         this.eventTarget = "NULL";
         this.eventContent = "NULL";

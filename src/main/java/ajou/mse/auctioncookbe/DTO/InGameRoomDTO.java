@@ -5,6 +5,7 @@ import ajou.mse.auctioncookbe.entity.Player;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Getter
@@ -29,7 +30,7 @@ public class InGameRoomDTO {
         this.gameCreator = inGameRoom.getGameCreator();
         this.gamePlayers = inGameRoom.getGamePlayers();
         this.gamePhase = inGameRoom.getGamePhase();
-        this.currentTimeStamp = LocalDateTime.now().toString();
+        this.currentTimeStamp = LocalDateTime.now(ZoneId.of("Asia/Seoul")).toString();
         this.currentGamePhaseTimeStamp = inGameRoom.getCurrentGamePhaseTimeStamp().toString();
         this.gameTurnCount = inGameRoom.getGameTurnCount();
     }

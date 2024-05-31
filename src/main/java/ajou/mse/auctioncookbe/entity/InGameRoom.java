@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public class InGameRoom {
 
         this.gamePlayers = gamePlayers;
         this.gamePhase = "WAIT";
-        this.currentGamePhaseTimeStamp = LocalDateTime.now();
+        this.currentGamePhaseTimeStamp = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.gameTurnCount = 0;
         this.gameEventBus = Collections.synchronizedList(new ArrayList<>());
     }

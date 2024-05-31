@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -95,14 +96,14 @@ public class GameRoomManageService {
                 LocalDateTime roomPhaseTimeStamp = gameRoom.getCurrentGamePhaseTimeStamp();
                 switch (gameRoom.getGamePhase()) {
                     case "READY":
-                        if (roomPhaseTimeStamp.plusSeconds(15L).isBefore(LocalDateTime.now())) {
+                        if (roomPhaseTimeStamp.plusSeconds(15L).isBefore(LocalDateTime.now(ZoneId.of("Asia/Seoul")))) {
                             gameRoom.setGamePhase("START");
                             gameRoom.setCurrentGamePhaseTimeStamp(roomPhaseTimeStamp.plusSeconds(15L));
                             // gameEventService.postEventByServer(gameRoomID, "PHASE START");
                         }
                         break;
                     case "START":
-                        if (roomPhaseTimeStamp.plusSeconds(30L).isBefore(LocalDateTime.now())) {
+                        if (roomPhaseTimeStamp.plusSeconds(30L).isBefore(LocalDateTime.now(ZoneId.of("Asia/Seoul")))) {
                             gameRoom.setGamePhase("END");
                             gameRoom.setCurrentGamePhaseTimeStamp(roomPhaseTimeStamp.plusSeconds(30L));
                             // gameEventService.postEventByServer(gameRoomID, "PHASE END");
@@ -110,7 +111,7 @@ public class GameRoomManageService {
                         }
                         break;
                     case "END":
-                        if (roomPhaseTimeStamp.plusSeconds(15L).isBefore(LocalDateTime.now())) {
+                        if (roomPhaseTimeStamp.plusSeconds(15L).isBefore(LocalDateTime.now(ZoneId.of("Asia/Seoul")))) {
                             gameRoom.setGamePhase("READY");
                             gameRoom.setCurrentGamePhaseTimeStamp(roomPhaseTimeStamp.plusSeconds(15L));
                             gameRoom.setGameTurnCount(gameRoom.getGameTurnCount() + 1);
