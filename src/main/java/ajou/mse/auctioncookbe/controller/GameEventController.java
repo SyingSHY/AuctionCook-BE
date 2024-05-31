@@ -28,7 +28,7 @@ public class GameEventController {
 
         String result = gameEventService.postEventByPlayer(gameID, userID, event);
 
-        if (result.equals("SUCCESS")) return ResponseEntity.ok(result);
+        if (result.equals("SUCCESS: Event posted")) return ResponseEntity.ok(result);
         else return ResponseEntity.badRequest().body(result);
     }
 }
