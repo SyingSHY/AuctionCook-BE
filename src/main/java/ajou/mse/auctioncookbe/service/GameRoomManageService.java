@@ -13,15 +13,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class GameRoomManageService {
 
-    private final GameEventService gameEventService;
+    // private final GameEventService gameEventService;
     private final UserRepository userRepository;
 
     private Map<String, InGameRoom> inGameRooms;
 
     @Autowired
-    public GameRoomManageService(UserRepository userRepository, GameEventService gameEventService) {
+    public GameRoomManageService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.gameEventService = gameEventService;
+        // this.gameEventService = gameEventService;
     }
 
     @PostConstruct
@@ -46,12 +46,12 @@ public class GameRoomManageService {
             if (!player.isFinishedLoading()) return "NOW YOU'RE READY. KEEP WATCHING EVENT BUS.";
         }
 
-        gameEventService.postEventByServer(gameRoomID, "GAME START");
+        // gameEventService.postEventByServer(gameRoomID, "GAME START");
 
         gameRoom.setGamePhase("READY");
         gameRoom.setCurrentGamePhaseTimeStamp(LocalDateTime.now());
 
-        gameEventService.postEventByServer(gameRoomID, "PHASE READY");
+        // gameEventService.postEventByServer(gameRoomID, "PHASE READY");
 
         return "GAME START";
     }
@@ -98,14 +98,14 @@ public class GameRoomManageService {
                         if (roomPhaseTimeStamp.plusSeconds(15L).isBefore(LocalDateTime.now())) {
                             gameRoom.setGamePhase("START");
                             gameRoom.setCurrentGamePhaseTimeStamp(roomPhaseTimeStamp.plusSeconds(15L));
-                            gameEventService.postEventByServer(gameRoomID, "PHASE START");
+                            // gameEventService.postEventByServer(gameRoomID, "PHASE START");
                         }
                         break;
                     case "START":
                         if (roomPhaseTimeStamp.plusSeconds(30L).isBefore(LocalDateTime.now())) {
                             gameRoom.setGamePhase("END");
                             gameRoom.setCurrentGamePhaseTimeStamp(roomPhaseTimeStamp.plusSeconds(30L));
-                            gameEventService.postEventByServer(gameRoomID, "PHASE END");
+                            // gameEventService.postEventByServer(gameRoomID, "PHASE END");
                             // 토큰 삭감 및 보존 처리 필요
                         }
                         break;
@@ -115,7 +115,7 @@ public class GameRoomManageService {
                             gameRoom.setCurrentGamePhaseTimeStamp(roomPhaseTimeStamp.plusSeconds(15L));
                             gameRoom.setGameTurnCount(gameRoom.getGameTurnCount() + 1);
                             gameRoom.provideTokenPerTurn();
-                            gameEventService.postEventByServer(gameRoomID, "PHASE READY");
+                            // gameEventService.postEventByServer(gameRoomID, "PHASE READY");
                         }
                         break;
                     default:
