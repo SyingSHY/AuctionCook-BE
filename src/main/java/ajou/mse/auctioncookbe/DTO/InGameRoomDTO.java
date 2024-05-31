@@ -20,6 +20,7 @@ public class InGameRoomDTO {
     private String gameCreator;
     private List<Player> gamePlayers;
     private String gamePhase;
+    private String currentTimeStamp;
     private String currentGamePhaseTimeStamp;
     private int gameTurnCount;
 
@@ -28,6 +29,7 @@ public class InGameRoomDTO {
         this.gameCreator = inGameRoom.getGameCreator();
         this.gamePlayers = inGameRoom.getGamePlayers();
         this.gamePhase = inGameRoom.getGamePhase();
+        this.currentTimeStamp = LocalDateTime.now().toString();
         this.currentGamePhaseTimeStamp = inGameRoom.getCurrentGamePhaseTimeStamp().toString();
         this.gameTurnCount = inGameRoom.getGameTurnCount();
     }

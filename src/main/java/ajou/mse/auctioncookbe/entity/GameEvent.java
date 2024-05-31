@@ -1,5 +1,6 @@
 package ajou.mse.auctioncookbe.entity;
 
+import ajou.mse.auctioncookbe.DTO.GameEventDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -50,12 +51,12 @@ public class GameEvent {
         }
     }
 
-    public GameEvent(IncomingEvent incomingEvent, InGameRoom gameRoom) {
-        this.eventType = incomingEvent.getEventType();
+    public GameEvent(GameEventDTO gameEventDTO, InGameRoom gameRoom) {
+        this.eventType = gameEventDTO.getEventType();
         this.eventTime = LocalDateTime.now();
-        this.eventSource = incomingEvent.getEventSource();
-        this.eventTarget = incomingEvent.getEventTarget();
-        this.eventContent = incomingEvent.getEventContent();
+        this.eventSource = gameEventDTO.getEventSource();
+        this.eventTarget = gameEventDTO.getEventTarget();
+        this.eventContent = gameEventDTO.getEventContent();
         this.eventCheckedBy = new HashMap<>();
         this.eventCheckedCount = 0;
 

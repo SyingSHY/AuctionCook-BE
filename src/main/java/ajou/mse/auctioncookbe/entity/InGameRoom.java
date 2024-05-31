@@ -6,8 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 @Data
 @Builder
@@ -27,7 +28,7 @@ public class InGameRoom {
     private String gamePhase;
     private LocalDateTime currentGamePhaseTimeStamp;
     private int gameTurnCount;
-    private LinkedList<GameEvent> gameEventBus;
+    private List<GameEvent> gameEventBus;
 
     public InGameRoom(WaitingRoom waitingRoom, List<Player> gamePlayers) {
         this.gameID = waitingRoom.getRedisId();
@@ -37,7 +38,7 @@ public class InGameRoom {
         this.gamePhase = "WAIT";
         this.currentGamePhaseTimeStamp = LocalDateTime.now();
         this.gameTurnCount = 0;
-        this.gameEventBus = new LinkedList<>();
+        this.gameEventBus = Collections.synchronizedList(new ArrayList<>());
     }
 
     public Player getGamePlayer(String playerID) {
