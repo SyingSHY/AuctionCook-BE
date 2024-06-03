@@ -13,12 +13,12 @@ public class GameStateReady implements IGameState {
 
     @Override
     public String postBid(InGameRoom gameRoom, String playerID, int currentBid, int newBid) {
-        return "Not Allowed in other phase";
+        return "Not Allowed in READY phase";
     }
 
     @Override
     public String postRecipe(InGameRoom gameRoom, String playerID, int recipeID) {
-        return "Not Allowed in other phase";
+        return "Not Allowed in READY phase";
     }
 
     @Override
