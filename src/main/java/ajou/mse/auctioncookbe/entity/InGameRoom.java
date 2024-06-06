@@ -1,5 +1,6 @@
 package ajou.mse.auctioncookbe.entity;
 
+import ajou.mse.auctioncookbe.entity.state.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,17 +27,29 @@ public class InGameRoom {
     private String gameID;
     private String gameCreator;
     private List<Player> gamePlayers;
-    private String gamePhase;
+    private IGameState gameState;
     private LocalDateTime currentGamePhaseTimeStamp;
     private int gameTurnCount;
     private List<GameEvent> gameEventBus;
 
+    private IGameState gameWaitState;
+    private IGameState gameReadyState;
+    private IGameState gameStartState;
+    private IGameState gameEndState;
+    private IGameState gameFinishState;
+
     public InGameRoom(WaitingRoom waitingRoom, List<Player> gamePlayers) {
+        this.gameWaitState = new GameStateWait(this);
+        this.gameReadyState = new GameStateReady(this);
+        this.gameStartState = new GameStateStart(this);
+        this.gameEndState = new GameStateEnd(this);
+        this.gameFinishState = new GameStateFinish(this);
+
         this.gameID = waitingRoom.getRedisId();
         this.gameCreator = waitingRoom.getRoomCreator();
 
         this.gamePlayers = gamePlayers;
-        this.gamePhase = "WAIT";
+        this.gameState = this.gameWaitState;
         this.currentGamePhaseTimeStamp = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.gameTurnCount = 0;
         this.gameEventBus = Collections.synchronizedList(new ArrayList<>());
@@ -49,6 +62,10 @@ public class InGameRoom {
             }
         }
         return null;
+    }
+
+    public void moveNextGameState(IGameState gameState) {
+        this.gameState.moveNextState(gameState);
     }
 
     public void provideTokenPerTurn() {

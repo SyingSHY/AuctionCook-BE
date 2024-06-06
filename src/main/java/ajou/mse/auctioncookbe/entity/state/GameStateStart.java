@@ -5,14 +5,20 @@ import ajou.mse.auctioncookbe.entity.Player;
 
 public class GameStateStart implements IGameState {
 
+    private InGameRoom assignedGameRoom;
+
+    public GameStateStart(InGameRoom gameRoom) {
+        this.assignedGameRoom = gameRoom;
+    }
+
     @Override
-    public String toggleBidOrCook(InGameRoom gameRoom, String playerID) {
+    public String toggleBidOrCook(String playerID) {
         return "Not Allowed in START phase";
     }
 
     @Override
-    public String postBid(InGameRoom gameRoom, String playerID, int currentBid, int newBid) {
-        Player player = gameRoom.getGamePlayer(playerID);
+    public String postBid(String playerID, int currentBid, int newBid) {
+        Player player = assignedGameRoom.getGamePlayer(playerID);
 
         if (player.isGoingOnBid()) {
             return player.putBidding(currentBid, newBid) + "";
@@ -23,8 +29,8 @@ public class GameStateStart implements IGameState {
     }
 
     @Override
-    public String postRecipe(InGameRoom gameRoom, String playerID, int recipeID) {
-        Player player = gameRoom.getGamePlayer(playerID);
+    public String postRecipe(String playerID, int recipeID) {
+        Player player = assignedGameRoom.getGamePlayer(playerID);
 
         if (player.isGoingOnBid()) {
             return player.cookRecipe(recipeID).toString();
@@ -35,7 +41,12 @@ public class GameStateStart implements IGameState {
     }
 
     @Override
-    public void nextState(InGameRoom gameRoom) {
-
+    public void moveNextState(IGameState gameState) {
+        if (gameState == null) {
+            assignedGameRoom.moveNextGameState(assignedGameRoom.getGameEndState());
+        }
+        else {
+            assignedGameRoom.moveNextGameState(gameState);
+        }
     }
 }

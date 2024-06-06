@@ -29,7 +29,7 @@ public class InGameRoomDTO {
         this.gameID = inGameRoom.getGameID();
         this.gameCreator = inGameRoom.getGameCreator();
         this.gamePlayers = inGameRoom.getGamePlayers();
-        this.gamePhase = inGameRoom.getGamePhase();
+        this.gamePhase = inGameRoom.getGameState();
         this.currentTimeStamp = LocalDateTime.now(ZoneId.of("Asia/Seoul")).toString();
         this.currentGamePhaseTimeStamp = inGameRoom.getCurrentGamePhaseTimeStamp().toString();
         this.gameTurnCount = inGameRoom.getGameTurnCount();

@@ -1,6 +1,9 @@
 package ajou.mse.auctioncookbe.service;
 
 import ajou.mse.auctioncookbe.entity.*;
+import ajou.mse.auctioncookbe.entity.state.GameStateEnd;
+import ajou.mse.auctioncookbe.entity.state.GameStateReady;
+import ajou.mse.auctioncookbe.entity.state.GameStateStart;
 import ajou.mse.auctioncookbe.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +52,7 @@ public class GameRoomManageService {
 
         // gameEventService.postEventByServer(gameRoomID, "GAME START");
 
-        gameRoom.setGamePhase("READY");
+        gameRoom.moveNextGameState(null);
         gameRoom.setCurrentGamePhaseTimeStamp(LocalDateTime.now());
 
         // gameEventService.postEventByServer(gameRoomID, "PHASE READY");
@@ -62,7 +65,7 @@ public class GameRoomManageService {
         InGameRoom gameRoom = queryGameRoom(gameRoomID);
         Player player = gameRoom.getGamePlayer(playerID);
 
-        if (gameRoom.getGamePhase().equals("READY")) {
+        if (gameRoom.getGameState().equals("READY")) {
             boolean nowToggle = player.toggleGoingOnBid();
 
             return nowToggle ? "You will bid" : "You will cook";
@@ -75,9 +78,7 @@ public class GameRoomManageService {
         InGameRoom gameRoom = queryGameRoom(gameRoomID);
         Player player = gameRoom.getGamePlayer(playerID);
 
-        boolean result = player.putBidding(currentBid, newBid);
-
-        return result + "";
+        return gameRoom.getGameState().postBid(playerID, currentBid, newBid);
     }
 
     public String postRecipe(String gameRoomID, String playerID, int recipeID) {
@@ -85,41 +86,40 @@ public class GameRoomManageService {
         InGameRoom gameRoom = queryGameRoom(gameRoomID);
         Player player = gameRoom.getGamePlayer(playerID);
 
-        List<Integer> result = player.cookRecipe(recipeID);
-
-        return result.toString();
+        return gameRoom.getGameState().postRecipe(playerID, recipeID);
     }
 
     public InGameRoom queryGameRoom(String gameRoomID) {
         for (InGameRoom gameRoom : inGameRooms.values()) {
             if (gameRoom.getGameID().equals(gameRoomID)) {
                 LocalDateTime roomPhaseTimeStamp = gameRoom.getCurrentGamePhaseTimeStamp();
-                switch (gameRoom.getGamePhase()) {
-                    case "READY":
+                switch (gameRoom.getGameState()) {
+                    case GameStateReady ignore -> {
                         if (roomPhaseTimeStamp.plusSeconds(15L).isBefore(LocalDateTime.now(ZoneId.of("Asia/Seoul")))) {
-                            gameRoom.setGamePhase("START");
+                            gameRoom.moveNextGameState(null);
                             gameRoom.setCurrentGamePhaseTimeStamp(roomPhaseTimeStamp.plusSeconds(15L));
                             // gameEventService.postEventByServer(gameRoomID, "PHASE START");
                         }
-                        break;
-                    case "START":
+                    }
+                    case GameStateStart ignore -> {
                         if (roomPhaseTimeStamp.plusSeconds(30L).isBefore(LocalDateTime.now(ZoneId.of("Asia/Seoul")))) {
-                            gameRoom.setGamePhase("END");
+                            gameRoom.moveNextGameState(null);
                             gameRoom.setCurrentGamePhaseTimeStamp(roomPhaseTimeStamp.plusSeconds(30L));
                             // gameEventService.postEventByServer(gameRoomID, "PHASE END");
-                            // 토큰 삭감 및 보존 처리 필요
                         }
-                        break;
-                    case "END":
+                    }
+                    case GameStateEnd ignore -> {
                         if (roomPhaseTimeStamp.plusSeconds(15L).isBefore(LocalDateTime.now(ZoneId.of("Asia/Seoul")))) {
-                            gameRoom.setGamePhase("READY");
+                            gameRoom.moveNextGameState(null);
                             gameRoom.setCurrentGamePhaseTimeStamp(roomPhaseTimeStamp.plusSeconds(15L));
                             gameRoom.setGameTurnCount(gameRoom.getGameTurnCount() + 1);
                             gameRoom.provideTokenPerTurn();
                             // gameEventService.postEventByServer(gameRoomID, "PHASE READY");
                         }
-                        break;
-                    default:
+                    }
+                    default -> {
+                        continue;
+                    }
                 }
                 return gameRoom;
             }

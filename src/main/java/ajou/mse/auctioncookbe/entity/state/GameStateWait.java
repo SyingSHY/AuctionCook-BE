@@ -4,23 +4,34 @@ import ajou.mse.auctioncookbe.entity.InGameRoom;
 
 public class GameStateWait implements IGameState {
 
+    private InGameRoom assignedGameRoom;
+
+    public GameStateWait(InGameRoom gameRoom) {
+        this.assignedGameRoom = gameRoom;
+    }
+
     @Override
-    public String toggleBidOrCook(InGameRoom gameRoom, String playerID) {
+    public String toggleBidOrCook(String playerID) {
         return "";
     }
 
     @Override
-    public String postBid(InGameRoom gameRoom, String playerID, int currentBid, int newBid) {
+    public String postBid(String playerID, int currentBid, int newBid) {
         return "";
     }
 
     @Override
-    public String postRecipe(InGameRoom gameRoom, String playerID, int recipeID) {
+    public String postRecipe(String playerID, int recipeID) {
         return "";
     }
 
     @Override
-    public void nextState(InGameRoom gameRoom) {
-
+    public void moveNextState(IGameState gameState) {
+        if (gameState == null) {
+            assignedGameRoom.moveNextGameState(assignedGameRoom.getGameReadyState());
+        }
+        else {
+            assignedGameRoom.moveNextGameState(gameState);
+        }
     }
 }

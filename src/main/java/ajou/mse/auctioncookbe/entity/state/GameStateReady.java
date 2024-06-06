@@ -5,24 +5,35 @@ import ajou.mse.auctioncookbe.entity.Player;
 
 public class GameStateReady implements IGameState {
 
+    private InGameRoom assignedGameRoom;
+
+    public GameStateReady(InGameRoom gameRoom) {
+        this.assignedGameRoom = gameRoom;
+    }
+
     @Override
-    public String toggleBidOrCook(InGameRoom gameRoom, String playerID) {
-        Player player = gameRoom.getGamePlayer(playerID);
+    public String toggleBidOrCook(String playerID) {
+        Player player = assignedGameRoom.getGamePlayer(playerID);
         return player.toggleGoingOnBid() ? "You will bid" : "You will cook";
     }
 
     @Override
-    public String postBid(InGameRoom gameRoom, String playerID, int currentBid, int newBid) {
+    public String postBid(String playerID, int currentBid, int newBid) {
         return "Not Allowed in READY phase";
     }
 
     @Override
-    public String postRecipe(InGameRoom gameRoom, String playerID, int recipeID) {
+    public String postRecipe(String playerID, int recipeID) {
         return "Not Allowed in READY phase";
     }
 
     @Override
-    public void nextState(InGameRoom gameRoom) {
-
+    public void moveNextState(IGameState gameState) {
+        if (gameState == null) {
+            assignedGameRoom.moveNextGameState(assignedGameRoom.getGameStartState());
+        }
+        else {
+            assignedGameRoom.moveNextGameState(gameState);
+        }
     }
 }
