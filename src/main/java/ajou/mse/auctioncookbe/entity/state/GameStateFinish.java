@@ -29,4 +29,9 @@ public class GameStateFinish implements IGameState {
     public void moveNextState(IGameState gameState) {
 
     }
+
+    @Override
+    public String toString() {
+        return "FINISH";
+    }
 }

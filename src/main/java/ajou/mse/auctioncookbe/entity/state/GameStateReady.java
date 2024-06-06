@@ -36,4 +36,9 @@ public class GameStateReady implements IGameState {
             assignedGameRoom.moveNextGameState(gameState);
         }
     }
+
+    @Override
+    public String toString() {
+        return "READY";
+    }
 }

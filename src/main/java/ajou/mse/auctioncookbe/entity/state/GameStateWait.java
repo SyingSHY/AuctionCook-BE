@@ -34,4 +34,9 @@ public class GameStateWait implements IGameState {
             assignedGameRoom.moveNextGameState(gameState);
         }
     }
+
+    @Override
+    public String toString() {
+        return "WAIT";
+    }
 }

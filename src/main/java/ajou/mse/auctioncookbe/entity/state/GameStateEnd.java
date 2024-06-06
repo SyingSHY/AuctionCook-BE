@@ -34,4 +34,9 @@ public class GameStateEnd implements IGameState {
             assignedGameRoom.moveNextGameState(gameState);
         }
     }
+
+    @Override
+    public String toString() {
+        return "END";
+    }
 }
