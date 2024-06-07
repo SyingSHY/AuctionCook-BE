@@ -7,21 +7,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 @Service
 public class GameEventService {
 
-    public static final int MAX_PLAYER_INGAME = 4;
-
     private final GameRoomManageService gameRoomManageService;
     private final UserRepository userRepository;
+    private final GameEventBus gameEventBus;
 
     @Autowired
-    public GameEventService(GameRoomManageService gameRoomManageService, UserRepository userRepository) {
+    public GameEventService(GameRoomManageService gameRoomManageService, UserRepository userRepository, GameEventBus gameEventBus) {
         this.gameRoomManageService = gameRoomManageService;
         this.userRepository = userRepository;
+        this.gameEventBus = gameEventBus;
     }
 
     public String postEventByPlayer(String gameID, String playerID, GameEventDTO gameEventDTO) {
@@ -36,9 +35,7 @@ public class GameEventService {
             return "FAILED: No such player";
         }
 
-        GameEvent gameEvent = new GameEvent(gameEventDTO, targetGameRoom);
-        gameEvent.checkEventBy(playerID);
-        targetGameRoom.getGameEventBus().add(gameEvent);
+        gameEventBus.postEventByPlayer(gameID, playerID, gameEventDTO, targetGameRoom);
 
         return "SUCCESS: Event posted";
     }
@@ -50,25 +47,12 @@ public class GameEventService {
             return "FAILED";
         }
 
-        GameEvent gameEvent = switch (eventType) {
-            case "GAME START" -> new GameEvent(eventType, "Game has started", targetGameRoom);
-            case "PHASE READY" -> new GameEvent(eventType, "Phase READY", targetGameRoom);
-            case "PHASE START" -> new GameEvent(eventType, "Phase START", targetGameRoom);
-            case "PHASE END" -> new GameEvent(eventType, "Phase END", targetGameRoom);
-            case "GAME END" -> new GameEvent(eventType, "Game has ended", targetGameRoom);
-            default -> new GameEvent();
-        };
+        gameEventBus.postEventByServer(gameID, eventType, targetGameRoom);
 
-        boolean isAdded = targetGameRoom.getGameEventBus().add(gameEvent);
-
-        if (isAdded) return "SUCCESS";
-        else return "FAILED";
+        return "OK";
     }
 
     public List<GameEventDTO> fetchEvent(String gameID, String playerID) {
-
-        // 반환 이벤트를 실을 리스트 초기화
-        List<GameEventDTO> resultEvent = new ArrayList<>();
 
         InGameRoom targetGameRoom = gameRoomManageService.queryGameRoom(gameID);
         if (targetGameRoom == null) {
@@ -80,22 +64,6 @@ public class GameEventService {
             return null;
         }
 
-        // 이벤트 버스 내 이벤트 수신 처리
-        List<GameEvent> targetGameEventBus = targetGameRoom.getGameEventBus();
-        for (GameEvent event : targetGameEventBus) {
-            if (event.isCheckedBy(playerID)) {
-                continue;
-            }
-            else {
-                resultEvent.add(new GameEventDTO(event));
-
-                event.checkEventBy(playerID);
-                if (event.getEventCheckedCount() == MAX_PLAYER_INGAME) {
-                    targetGameEventBus.remove(event);
-                }
-            }
-        }
-
-        return resultEvent;
+        return gameEventBus.fetchEvent(gameID, playerID);
     }
 }

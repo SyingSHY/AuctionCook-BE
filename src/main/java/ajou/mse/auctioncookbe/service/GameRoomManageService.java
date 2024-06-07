@@ -19,13 +19,15 @@ public class GameRoomManageService {
 
     // private final GameEventService gameEventService;
     private final UserRepository userRepository;
+    private final GameEventBus gameEventBus;
 
     private Map<String, InGameRoom> inGameRooms;
 
     @Autowired
-    public GameRoomManageService(UserRepository userRepository) {
+    public GameRoomManageService(UserRepository userRepository, GameEventBus gameEventBus) {
         this.userRepository = userRepository;
         // this.gameEventService = gameEventService;
+        this.gameEventBus = gameEventBus;
     }
 
     @PostConstruct
@@ -37,6 +39,7 @@ public class GameRoomManageService {
         List<Player> playerList = fetchJoinedPlayers(waitingRoom);
         InGameRoom inGameRoom = new InGameRoom(waitingRoom, playerList);
         inGameRooms.put(inGameRoom.getGameID(), inGameRoom);
+        gameEventBus.addGameEventBus(inGameRoom.getGameID());
     }
 
     public String setReady(String gameRoomID, String playerID) {

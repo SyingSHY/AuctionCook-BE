@@ -30,7 +30,6 @@ public class InGameRoom {
     private IGameState gameState;
     private LocalDateTime currentGamePhaseTimeStamp;
     private int gameTurnCount;
-    private List<GameEvent> gameEventBus;
 
     private IGameState gameWaitState;
     private IGameState gameReadyState;
@@ -52,7 +51,6 @@ public class InGameRoom {
         this.gameState = this.gameWaitState;
         this.currentGamePhaseTimeStamp = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.gameTurnCount = 0;
-        this.gameEventBus = Collections.synchronizedList(new ArrayList<>());
     }
 
     public Player getGamePlayer(String playerID) {
