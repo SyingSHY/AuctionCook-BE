@@ -6,7 +6,6 @@ import ajou.mse.auctioncookbe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,7 +22,7 @@ public class GameEventService {
         this.gameEventBus = gameEventBus;
     }
 
-    public String postEventByPlayer(String gameID, String playerID, GameEventDTO gameEventDTO) {
+    public String postEvent(String gameID, String playerID, GameEventDTO gameEventDTO) {
 
         InGameRoom targetGameRoom = gameRoomManageService.queryGameRoom(gameID);
         if (targetGameRoom == null) {

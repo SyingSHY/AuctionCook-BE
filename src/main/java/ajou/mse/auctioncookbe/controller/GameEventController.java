@@ -1,7 +1,6 @@
 package ajou.mse.auctioncookbe.controller;
 
 import ajou.mse.auctioncookbe.DTO.GameEventDTO;
-import ajou.mse.auctioncookbe.entity.IncomingEvent;
 import ajou.mse.auctioncookbe.service.GameEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,7 @@ public class GameEventController {
     @PostMapping("/games/{gameID}/events")
     public ResponseEntity<String> postEvent(@PathVariable String gameID, @RequestParam String userID, @RequestBody GameEventDTO event) {
 
-        String result = gameEventService.postEventByPlayer(gameID, userID, event);
+        String result = gameEventService.postEvent(gameID, userID, event);
 
         if (result.equals("SUCCESS")) return ResponseEntity.ok(result);
         else return ResponseEntity.badRequest().body(result);
