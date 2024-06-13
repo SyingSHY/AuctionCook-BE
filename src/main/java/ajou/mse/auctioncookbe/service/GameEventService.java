@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -82,16 +83,19 @@ public class GameEventService {
 
         // 이벤트 버스 내 이벤트 수신 처리
         List<GameEvent> targetGameEventBus = targetGameRoom.getGameEventBus();
-        for (GameEvent event : targetGameEventBus) {
-            if (event.isCheckedBy(playerID)) {
-                continue;
-            }
-            else {
-                resultEvent.add(new GameEventDTO(event));
+        synchronized (targetGameEventBus) {
+            Iterator<GameEvent> iterator = targetGameEventBus.iterator();
+            while (iterator.hasNext()) {
+                GameEvent event = iterator.next();
+                if (event.isCheckedBy(playerID)) {
+                    continue;
+                } else {
+                    resultEvent.add(new GameEventDTO(event));
 
-                event.checkEventBy(playerID);
-                if (event.getEventCheckedCount() == MAX_PLAYER_INGAME) {
-                    targetGameEventBus.remove(event);
+                    event.checkEventBy(playerID);
+                    if (event.getEventCheckedCount() == MAX_PLAYER_INGAME) {
+                        iterator.remove();
+                    }
                 }
             }
         }
