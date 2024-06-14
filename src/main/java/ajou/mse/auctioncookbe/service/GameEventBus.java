@@ -5,10 +5,7 @@ import ajou.mse.auctioncookbe.entity.GameEvent;
 import ajou.mse.auctioncookbe.entity.InGameRoom;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -64,16 +61,19 @@ public class GameEventBus {
 
         // 이벤트 버스 내 이벤트 수신 처리
         List<GameEvent> targetGameEventBus = this.gameEventBusList.get(gameID);
-        for (GameEvent event : targetGameEventBus) {
-            if (event.isCheckedBy(playerID)) {
-                continue;
-            }
-            else {
-                resultEventList.add(new GameEventDTO(event));
+        synchronized (targetGameEventBus) {
+            Iterator<GameEvent> iterator = targetGameEventBus.iterator();
+            while (iterator.hasNext()) {
+                GameEvent event = iterator.next();
+                if (event.isCheckedBy(playerID)) {
+                    continue;
+                } else {
+                    resultEventList.add(new GameEventDTO(event));
 
-                event.checkEventBy(playerID);
-                if (event.getEventCheckedCount() == MAX_PLAYER_INGAME) {
-                    targetGameEventBus.remove(event);
+                    event.checkEventBy(playerID);
+                    if (event.getEventCheckedCount() == MAX_PLAYER_INGAME) {
+                        iterator.remove();
+                    }
                 }
             }
         }
