@@ -1,12 +1,12 @@
-<center>
+<div align="center">
 
 # :cook: Auction Cook!
 ![TitleImage](./docs/AuctionCookMainTitle.png)  
 ### Repository for Server(Back-end)
-:open_file_folder: **Repository for Client** : [Client](https://github.com/owl2lwo12/MSE_2024_FA)  
+:open_file_folder: **Go to Repository for Client** : [Client](https://github.com/owl2lwo12/MSE_2024_FA)  
 :key: **API Specification** : [Postman](https://auctioncook.postman.co/workspace/855a4b83-b897-46fd-aca3-9efe42f9125a)
 
-</center>
+</div>
 <br><br>
 
 ## 🔍 Overview
@@ -128,7 +128,7 @@ Please refer to the following link for installation and AWS settings: [Velog](ht
 
 <br><br>
 
-## :octocat: Team Member List
+## :busts_in_silhouette: Team Member List
 ### Back-end Repository
 |  Name  |      Major      |    Part    | E-Mail | Etc. |
 | :----: | :------------: | :--------: | :--: | --- |
